@@ -1,0 +1,192 @@
+// Datum: 25.10.2023 
+// TLDR: Klasse zum Codieren und Decodieren von Zahlensystemen und Buchstaben anhand von den verschiedenen Basen.
+
+import java.util.LinkedList;
+import java.util.List;
+
+public class Excellent {
+
+
+    // Enumeration für verschiedene Codierungsarten
+    public enum Code {
+        RAW,     // Rohdaten (ungecodiert)
+        DIGITS,  // Dezimale Ziffern
+        HEX,     // Hexadezimale Zahlen
+        LETTERS  // Buchstaben
+    }
+
+    // Methode zum Codieren einer Zahl in einer bestimmten Basis und einem bestimmten Code
+    public static String encodeExcellent(int number, int base, Code code) {
+
+     
+        LinkedList<Object> valueList = new LinkedList<>();
+        LinkedList<Object> switchedList = new LinkedList<>();
+        StringBuilder stringBuilder = new StringBuilder();
+        int result1 = number;
+        char finalValueC;
+        boolean stop = true;
+
+        // Überprüfung, ob die Zahl positiv ist und die Basis größer oder gleich 2 ist
+        if (number > 0 && base >= 2) {
+
+            // Codierung je nach Basis
+            switch (base) {
+                case 10:  // jede Zahl wird um ein wert Verschoben bsp: aus "123" wird "012"
+                    while (stop) {
+                        result1--;
+                        int result2 = result1 / base;
+                        int finalValue = result1 % base;
+                        result1 = result2;
+                        valueList.add(finalValue);
+                        if (result2 <= 0) {
+                            stop = false;
+                        }
+                    }
+                    break;
+                case 26:  
+                    while (stop) { // Zahl in Buchstaben umwandeln bsp. aus "1" wird "A"
+                        int count = result1;
+                        int result2 = result1 / base;
+                        int finalValue = result1 % base;
+                        result1 = result2;
+                        count = result2;
+                        char x = (char) ((finalValue) + 64);
+                        valueList.add(x);
+                        if (count <= 0) {
+                            stop = false;
+                        }
+                    }
+                    break;
+                case 16:  
+                    while (stop) { // Zahl in Hexdezimal umwandel bsp. aus "27" wird "0A" 
+                        result1--;
+                        int result2 = result1 / base;
+                        int finalValue = result1 % base;
+                        if (finalValue < 10) {
+                            finalValueC = (char) ((finalValue) + 48);
+                        } else {
+                            finalValue -= 9;
+                            finalValueC = (char) ((finalValue) + 64);
+                        }
+                        result1 = result2;
+                        valueList.add(finalValueC);
+                        if (result2 <= 0) {
+                            stop = false;
+                        }
+                    }
+            }
+        } else {
+            // Fehlermeldung für ungültige Eingaben
+            throw new IllegalArgumentException("Zahl nicht positiv / Falsche Basis");
+        }
+
+        // Umkehrung der Liste für die korrekte Reihenfolge
+        for (int t = valueList.size() - 1; t >= 0; t--) {
+            switchedList.add(valueList.get(t));
+        }
+
+        // Konvertierung der Liste in einen String
+        for (Object t : switchedList) {
+            stringBuilder.append(t);
+        }
+
+        // Rückgabe des codierten Strings
+        String ntS = stringBuilder.toString();
+        return ntS;
+    }
+
+    // Methode zum Decodieren eines Strings in eine Zahl
+    public static int decodeExcellent(String string, int base, Code code) {
+        int ergebnis = 0;
+        LinkedList<Character> valueList = new LinkedList<>();
+        LinkedList<Integer> valueList2 = new LinkedList<>();
+
+        
+        switch (code) {
+
+            case DIGITS:  
+                if (string.chars().allMatch(Character::isDigit)) {
+                    for (int t = 0; t < string.length(); t++) {
+                        valueList.add(string.charAt(t));
+                    }
+                    for (Character a : valueList) {
+                        int y = (char) a;
+                        y = y - 48;
+                        valueList2.add(y);
+                    }
+                    int multiplikator = 1;
+                    for (int k = valueList2.size() - 1; k >= 0; k--) {
+                        ergebnis = ergebnis + ((valueList2.get(k) + 1) * multiplikator);
+                        multiplikator = multiplikator * 10;
+                    }
+                } else {
+                    throw new IllegalArgumentException("Falsch");
+                }
+                break;
+
+            case HEX:  
+                if ((string.chars().allMatch(Character::isLetterOrDigit) && !string.contains("Ä")
+                        && !string.contains("Ö") && !string.contains("Ü"))) {
+
+                    for (int t = 0; t < string.length(); t++) {
+                        valueList.add(string.charAt(t));
+                    }
+                    for (Character a : valueList) {
+                        int vergleich = (char) a;
+                        if (vergleich < 58) {
+                            int y = (char) a;
+                            y = y - 48;
+                            valueList2.add(y);
+                        } else {
+                            int y = (char) a;
+                            y = y - 55;
+                            valueList2.add(y);
+                        }
+                    }
+                    int expo = valueList2.size() - 1;
+                    for (int t = 0; t < valueList2.size(); t++) {
+                        int zwisch = (int) Math.pow((int) base, (int) expo);
+                        int zwisch2 = (valueList2.get(t) + 1);
+                        ergebnis = ergebnis + (zwisch * zwisch2);
+                        expo--;
+                    }
+
+                } else {
+                    throw new IllegalArgumentException("Falsch");
+                }
+                break;
+
+            case LETTERS:  
+                if (string.chars().allMatch(Character::isLetter)) {
+                    for (int t = 0; t < string.length(); t++) {
+                        valueList.add(string.charAt(t));
+                    }
+                    for (Character a : valueList) {
+                        int y = (char) a;
+                        y = y - 64;
+                        valueList2.add(y);
+                    }
+
+                    int expos = valueList2.size() - 1;
+                    for (int t = 0; t < valueList2.size(); t++) {
+                        int zwisch = (int) Math.pow((int) base, (int) expos);
+                        int zwisch2 = (valueList2.get(t));
+                        ergebnis = ergebnis + (zwisch * zwisch2);
+                        expos--;
+                    }
+                } else {
+                    throw new IllegalArgumentException("Falsch");
+                }
+                break;
+
+            case RAW: 
+                if (string.chars().allMatch(Character::isDigit)) {
+                    // -- //
+                } else {
+                    throw new IllegalArgumentException("Falsch");
+                }
+                break;
+        }
+        return ergebnis;
+    }
+}
