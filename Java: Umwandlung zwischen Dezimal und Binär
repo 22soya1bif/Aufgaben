@@ -1,0 +1,134 @@
+
+//Datum: 27.10.2023
+// TLDR: Programm um eine Bytefolge umzudrehen, davor muss die Dezimalzahl erst in binär umgewnandelt werden,außerdem herauszufinden ob es sich um eine Mehrbyte folge handelt. 
+
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+
+public class UnicodeReverse {
+    public static byte[] reverseUnicode(byte[] input) {
+
+    byte[] ergebnis = new byte[input.length];
+        LinkedList<Integer> byteFolgeX = new LinkedList<>();
+        int[] byteFolge = new int[8];
+        int[] byteFolge2 = new int[8];
+// Dezimalzahl in Bynär umwandeln
+        for (int inputZahl : input) {
+            int initial = inputZahl;
+            if (inputZahl<0) {
+                initial=initial*(-1);
+            }
+            for (int i = 6; i >= 0; i--) {
+                byteFolge[i] = initial % 2;
+                initial = initial / 2;
+            }
+            for(int b=0;b<=byteFolge.length;b++) {
+                try {
+                    byteFolge2[b+1]=byteFolge[b];
+                }catch(ArrayIndexOutOfBoundsException e) {
+                    byteFolge2[0] = byteFolge[byteFolge.length - 1];
+                }}
+                if (inputZahl<0) {     //Falls die Zahl Negativ ist werden alle Zahlen umgedreht
+                    for (int k=0;k<byteFolge2.length;k++){
+                        if(byteFolge2[k]==0){
+                            byteFolge2[k]=1;
+                        }else{
+                            byteFolge2[k]=0;
+                        }
+                    }
+                    // letze Binär Zahl wird Addiert
+                    if(byteFolge2[7]==0){
+                        byteFolge2[7]=1;
+                    }
+                    else{
+                        //falls die letze Ziffer eine 1 ist verändert sich die Ziffern davor auch bis eine Zahl eine 0 ist
+                        boolean ZifferNull= true;
+                        byteFolge2[7]=0;
+                        int binaerZaehler =6;
+                        while (ZifferNull){
+                            if(byteFolge2[binaerZaehler]==1){
+                                byteFolge2[binaerZaehler]=0;
+                                binaerZaehler--;
+                            }
+                            else{
+                                byteFolge2[binaerZaehler]=1;
+                                ZifferNull=false;
+                            }
+                        }
+                }
+            }
+            for (int q: byteFolge2) {
+                byteFolgeX.add(q);
+            }
+        }
+        int [] index= new int[input.length];  //In dem Array nehme ich die Anzahl und Rheinfolge auf von den Bytes
+        int byteZaehler= 0;
+        boolean stopZahlen = true;
+        int indexZaehler=0;
+        while (byteZaehler<byteFolgeX.size()) {   //In der schleife schau ich ob es eine Mehrbyte folge ist oder Einzehl
+              int  zahler = 0;
+
+                if (byteFolgeX.get(byteZaehler) == 0) {
+                    index[indexZaehler] = 1;
+                    indexZaehler++;
+
+                } else {
+                    int aktuelleByte = byteZaehler;
+                    while (stopZahlen) {//In der While schleife zählt der genau wie viele Zahlen es sind
+                        if (byteFolgeX.get(aktuelleByte) == 1) {
+                            aktuelleByte++;
+                            zahler++;
+                        } else {
+                            stopZahlen = false;
+                        }
+                    }
+                    index[indexZaehler] = zahler;
+                    indexZaehler++;
+                }
+                // ich geh in der Liste in 8*n schritten durch um immer die anfangs bytesnzu erfassen.
+              if(byteZaehler==0&&zahler==0){
+                   byteZaehler=(byteZaehler+8)+(8*zahler);
+                   stopZahlen=true;
+               }else{
+                  if(zahler>0){
+                  byteZaehler=byteZaehler+(8*zahler);
+                  stopZahlen=true;
+              }else{
+                   byteZaehler=8+byteZaehler;
+              }
+               }
+            }
+        int zahler= 0;
+        int inputLänge=input.length-1;
+        int indexArrayLaenge=input.length-1;
+        //IN der Schleife tauschen wir die Zahlen aus, es wird von hinten durchgelaufen
+       while(inputLänge>=0) {
+           int byteGroesse= index[indexArrayLaenge];
+           if(byteGroesse==0) {//höchst warscheinlich ist in dem Araay mit den größen der Bytefolgen mit nullern gefüllt da es die gleiche Arraylänge hat wie Input Array
+               indexArrayLaenge--;
+           }
+               if (byteGroesse == 1) {
+                   ergebnis[zahler] = input[inputLänge];
+                   zahler++;
+                   inputLänge--;
+                   indexArrayLaenge--;
+
+               } else if (byteGroesse > 1) {
+                   //falls es eine Mehrbytefoleg ist suche ich anhand ByteGroesse zu welchem Array Element ich springen muss für die Rheinfolge
+                   byteGroesse--;
+                   int verschieben = 0;
+
+                   while (verschieben <= byteGroesse) {
+                       ergebnis[zahler] = input[inputLänge - index[indexArrayLaenge] + 1 + verschieben];
+                       zahler++;
+                       verschieben++;
+                   }
+                   //damit  man paralle die Elemente heruasfiltert ziehe ich die gröse der Zahlen von der Index länge vom Array Input ab
+                   inputLänge = inputLänge - verschieben;
+                    indexArrayLaenge--;
+               }}
+        return ergebnis;
+    }
+
+
+}
