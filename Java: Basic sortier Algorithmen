@@ -1,0 +1,101 @@
+//Datum: 02.11.2023
+// TLDR: Basic sortier Algorithmen.
+// ausgeführt via Test-Cases die ein unsortirte Arrays, So
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+
+public class SimpleSorting {
+    /**
+     * Method to sort an array using bubble sort. Bubble sorting works by
+     * iterating over the array to be sorted n times. In every iteration
+     * all n-1 pairs of consecutive elements are compared. If the second
+     * element in the pair is smaller than the first one, the two elements
+     * are interchanged. A typical behaviour of bubble sort is that a large
+     * element can move quite far to the array's right end in one iteration
+     * while a small element only moves one step to the left during a single
+     * iteration. Note that it is not allowed to call any external method
+     * besides compar.compare and output. Doing so will cause a substantial
+     * deduction of points.
+     * @param data Array of input data
+     * @param compar Comparator used to determine which item is larger
+     * @param output Method that must be called to output intermediate data
+     */
+    public static<T> void bubbleSort(T[]data, Comparator<T>compar, Consumer<T[]> output) {
+        for (int i = 0; i < data.length; i++) {
+            for (int j=0; j<data.length-1;j++){
+                if(compar.compare(data[j],data[j+1])>0){
+                    T help=data[j];
+                    data[j]=data[j+1];
+                    data[j+1]=help;
+                }
+            }
+            output.accept(data);
+        }
+    }
+
+    /**
+     * Method to sort an array using insert sort. Insert sorting works by
+     * iterating over the array to be sorted n times. In the k-th iteration
+     * the element at position k is taken and inserted into the elements
+     * from position 0 to position k-1 thus forming a sequence of k sorted
+     * elements. A typical behaviour of insert sort is that a after the k-th
+     * step the first k original elements form a sorted subsequence. Note
+     * that your are not allowed to call any external method besides the
+     * comparators compare()-method and output. Doing so will cause a
+     * substantial deduction of points.
+     * @param data Array of input data
+     * @param compar Comparator used to determine which item is larger
+     * @param output Method that must be called to output intermediate data
+     */
+    public static<T> void insertSort(T[]data, Comparator<T>compar, Consumer<T[]> output) {
+        for (int i = 1; i < data.length; i++) {
+           if(compar.compare(data[i-1],data[i])>0){
+               T checkPoint = data[i];
+               for(int p=i;p>0&&compar.compare(data[p-1],checkPoint)>0;p--){
+                   data[p]=data[p-1];
+                    data[p-1]=checkPoint;
+               }
+           }
+            output.accept(data);
+        }
+    }
+
+    /**
+     * Method to sort an array using select sort. Select sorting works by
+     * selecting the smallest element among those elements that have not
+     * yet been sorted. This element is then swapped with the first element
+     * among the not yet sorted ones. In the k-th iteration the smallest
+     * element between position k and the end of the sequence is taken and
+     * swapped with the element at position k. A typical behaviour of select
+     * sort is that a after the k-th step the first k smallest of the sequence
+     * are sorted in position 0...k-1. Note that your are not allowed to call
+     * any external method besides the comparators compare()-method and output.
+     * Doing so will cause a substantial deduction of points.
+     * @param data Array of input data
+     * @param compar Comparator used to determine which item is larger
+     * @param output Method that must be called to output intermediate data
+     */
+    public static<T> void selectSort(T[]data, Comparator<? super T>compar, Consumer<T[]> output) {
+      int min =0;
+        int i = 0;
+        for (; i < data.length; i++) {
+                for(int k=0;k<data.length-1;k++){
+                }
+             min = i;
+            for(int p= i+1;p<data.length;p++){
+
+                if(compar.compare(data[min],data[p])>0) {
+                    min = p;
+                }
+                    if(p== data.length-1){
+                    T help =data[i];
+                    data[i]=data[min];
+                    data[min]=help;}
+            }
+            output.accept(data);
+        }
+    }
+}
