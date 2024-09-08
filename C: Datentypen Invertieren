@@ -1,0 +1,333 @@
+//Datum: 01.05.2024
+// Functionen um  Datentypen zu Invetieren oder auf bestimmte sachen zu überprüfen
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <memory.h>
+
+#define IS_EMPTY 0
+#define IS_BOOL 1
+#define IS_CHAR 2
+#define IS_SHORT 3
+#define IS_INT 4
+#define IS_LONG 5
+#define IS_FLOAT 6
+#define IS_DOUBLE 7
+#define IS_VOIDP 8
+#define IS_UCHAR 9
+#define IS_USHORT 10
+#define IS_UINT 11
+#define IS_ULONG 12
+#define IS_STRING 13
+
+/* Erklären Sie an dieser Stelle, wie sich die Größe einer Struktur vom Type overLoadUnpacked ergibt
+* Antwort: Die Größe der Struktur ergibt sich durch den Tag (in diesem Fall short) + die größte Größe der Union (Double).
+* Heißt 2 Bytes (short) + 8 Bytes (Double).
+* Wenn eine Struktur "unpacked" ist, dann setzt das System Ausrichtungslücken für effizienten Zugriff ein,
+* was heißt, die Größe wird mindestens 10 Bytes sein, aber idR größer aufgrund der Lücken.
+*/
+
+struct overLoadUnpacked {
+    short tag;
+    union {
+        bool asBool;
+        char asChar;
+        short asShort;
+        int asInt;
+        long asLong;
+        float asFloat;
+        double asDouble;
+        void *asVoidP;
+        unsigned char asUChar;
+        unsigned short asUShort;
+        unsigned int asUInt;
+        unsigned long asULong;
+        char *asString;
+    };
+};
+typedef struct overLoadUnpacked overLoadUnpacked;
+
+/* Erklären Sie an dieser Stelle, wie sich die Größe einer Struktur vom Type overLoadPacked ergibt
+* Antwort: Die Größe der Struktur ergibt sich durch den Tag (in diesem Fall short) + die größte Größe der Union (Double).
+* Heißt 2 Bytes (short) + 8 Bytes (Double).
+* Wenn eine Struktur "packed" ist, dann setzt das System keine Ausrichtungslücken für effizienten Zugriff ein,
+* was heißt, die Größe wird wahrscheinlich genau bei 10 Bytes liegen.
+*/
+
+struct overLoadPacked {
+    short tag;
+    union {
+        bool asBool;
+        char asChar;
+        short asShort;
+        int asInt;
+        long asLong;
+        float asFloat;
+        double asDouble;
+        void *asVoidP;
+        unsigned char asUChar;
+        unsigned short asUShort;
+        unsigned int asUInt;
+        unsigned long asULong;
+        char *asString;
+    };
+} __attribute__ ((packed));
+
+typedef struct overLoadPacked overLoadPacked;
+
+union primitiveTypes {
+    bool asBool;
+    char asChar;
+    short asShort;
+    int asInt;
+    long asLong;
+    float asFloat;
+    double asDouble;
+    void *asVoidP;
+    unsigned char asUChar;
+    unsigned short asUShort;
+    unsigned int asUInt;
+    unsigned long asULong;
+    char asRawData[sizeof(double)]; // Assuming that double is the largest type
+};
+typedef union primitiveTypes primitiveTypes;
+
+/* Implementieren Sie die Funktion printOneoverLoaded
+*/
+
+void printOneoverLoaded(overLoadUnpacked x)
+
+{
+    switch (x.tag) {
+        case IS_BOOL:
+            printf("Bool-Wert: %s\n", x.asBool ? "true" : "false");
+            break;
+        case IS_CHAR:
+            printf("Char-Wert: %c\n", x.asChar);
+            break;
+        case IS_SHORT:
+            printf("Short Integer Wert: %d\n", x.asShort);
+            break;
+        case IS_INT:
+            printf("Integer Wert: %d\n", x.asInt);
+            break;
+        case IS_LONG:
+            printf("Long Integer Wert: %ld\n", x.asLong);
+            break;
+        case IS_FLOAT:
+            printf("Float Wert: %f\n", x.asFloat);
+            break;
+        case IS_DOUBLE:
+            printf("Double Wert: %lf\n", x.asDouble);
+            break;
+        case IS_VOIDP:
+            printf("Void Pointer Wert: %p\n", x.asVoidP);
+            break;
+        case IS_UCHAR:
+            printf("Unsigned Character Wert: %c\n", x.asUChar);
+            break;
+        case IS_USHORT:
+            printf("Unsigned Short Integer Wert: %u\n", x.asUShort);
+            break;
+        case IS_UINT:
+            printf("Unsigned Integer Wert: %u\n", x.asUInt);
+            break;
+        case IS_ULONG:
+            printf("Unsigned Long Integer Wert: %lu\n", x.asULong);
+            break;
+        case IS_STRING:
+            printf("String Wert: %s\n", x.asString);
+            break;
+        default:
+            printf("falsch\n");
+    }
+}
+
+/* Implementieren Sie die Funktion printManyoverLoaded
+*/
+
+void printManyoverLoaded(int size, overLoadUnpacked x[])
+
+{
+    for (int i = 0; i < size; i++) {
+        printf("Element %d:\n", i + 1);
+        printOneoverLoaded(x[i]);
+        printf("\n");
+    }
+}
+
+/* Implementieren Sie die Funktion invertByteOrderShort
+*/
+
+short invertByteOrderShort(short data)
+
+{
+    short result = 0;
+    size_t size = sizeof(short); // Change to sizeof(short)
+    for (size_t i = 0; i < size; ++i) {
+        result |= ((data >> (8 * i)) & 0xFF) << (8 * (size - 1 - i));
+    }
+    return result;
+}
+
+/* Implementieren Sie die Funktion invertByteOrderInt
+*/
+
+int invertByteOrderInt(int data)
+
+{
+    int result = 0;
+    size_t size = sizeof(int);
+    for (size_t i = 0; i < size; ++i) {
+        result |= ((data >> (8 * i)) & 0xFF) << (8 * (size - 1 - i));
+    }
+    return result;
+}
+
+/* Implementieren Sie die Funktion invertByteOrderShort
+*/
+
+long invertByteOrderLong(long data)
+
+{
+    long result = 0;
+    size_t size = sizeof(long);
+    for (size_t i = 0; i < size; ++i) {
+        result |= ((data >> (8 * i)) & 0xFF) << (8 * (size - 1 - i));
+    }
+    return result;
+}
+
+/* Implementieren Sie die Funktion isLSB
+*/
+
+bool isLSB() {
+    int value = 0x12345678;
+    char *ptr = (char*)&value;
+    return ptr[0] == 0x78 && ptr[1] == 0x56 && ptr[2] == 0x34 && ptr[3] == 0x12;
+}
+
+/* Implementieren Sie die Funktion isMSB
+*/
+
+bool isMSB() {
+    int value = 0x12345678;
+    char *ptr = (char*)&value;
+    return ptr[0] == 0x12 && ptr[1] == 0x34 && ptr[2] == 0x56 && ptr[3] == 0x78;
+}
+
+void convertToRaw(const primitiveTypes *primitiveType, char data[], int size)
+
+{
+    if ( size>sizeof(primitiveTypes) ) {
+        size = sizeof(primitiveTypes);
+    }
+    memcpy(data,primitiveType,size);
+}
+
+int main(int argc, char *argv[]) {
+    bool boolData[] = {false, true};
+    char charData[] = {3,8, 1, 6, 5, 4, 7, 2, 9, 0};
+    short shortData[] = {3,8, 1, 6, 5, 4, 7, 2, 9, 0};
+    int intData[] = {3,8, 1, 6, 5, 4, 7, 2, 9, 0};
+    long longData[] = {3,8, 1, 6, 5, 4, 7, 2, 9, 0};
+    float floatData[] = {3,8, 1, 6, 5, 4, 7, 2, 9, 0};
+    double doubleData[] = {3,8, 1, 6, 5, 4, 7, 2, 9, 0};
+    overLoadUnpacked overLoadedData[5];
+    overLoadedData[0].tag=IS_BOOL;
+    overLoadedData[0].asBool=true;
+    overLoadedData[1].tag=IS_SHORT;
+    overLoadedData[1].asShort=42;
+    overLoadedData[2].tag=IS_ULONG;
+    overLoadedData[2].asULong=42;
+    overLoadedData[3].tag=IS_DOUBLE;
+    overLoadedData[3].asDouble=42;
+    overLoadedData[4].tag=IS_VOIDP;
+    overLoadedData[4].asVoidP=&overLoadedData;
+    overLoadPacked overLoadedPackedData[5];
+    overLoadedPackedData[0].tag=IS_BOOL;
+    overLoadedPackedData[0].asBool=true;
+    overLoadedPackedData[1].tag=IS_SHORT;
+    overLoadedPackedData[1].asShort=42;
+    overLoadedPackedData[2].tag=IS_ULONG;
+    overLoadedPackedData[2].asULong=42;
+    overLoadedPackedData[3].tag=IS_DOUBLE;
+    overLoadedPackedData[3].asDouble=42;
+    overLoadedPackedData[4].tag=IS_VOIDP;
+    overLoadedPackedData[4].asVoidP=&overLoadedData;
+
+    printf("BoolData: ");
+    for (int i = 0; i < 2; ++i) {
+        printf("%p ", &boolData[i]);
+    }
+    printf("\n");
+    printf("CharData: ");
+    for (int i = 0; i < 10; ++i) {
+        printf("%p ", &charData[i]);
+    }
+    printf("\n");
+    printf("ShortData: ");
+    for (int i = 0; i < 10; ++i) {
+        printf("%p ", &shortData[i]);
+    }
+    printf("\n");
+    printf("IntData: ");
+    for (int i = 0; i < 10; ++i) {
+        printf("%p ", &intData[i]);
+    }
+    printf("\n");
+    printf("LongData: ");
+    for (int i = 0; i < 10; ++i) {
+        printf("%p ", &longData[i]);
+    }
+    printf("\n");
+    printf("FloatData: ");
+    for (int i = 0; i < 10; ++i) {
+        printf("%p ", &floatData[i]);
+    }
+    printf("\n");
+    printf("DoubleData: ");
+    for (int i = 0; i < 10; ++i) {
+        printf("%p ", &doubleData[i]);
+    }
+    printf("\n");
+    printf("OverloadedData Unpacked: ");
+    for (int i = 0; i < 5; ++i) {
+        printf("%p ", &overLoadedData[i]);
+    }
+    printf("\n");
+    printf("OverloadedData Packed: ");
+    for (int i = 0; i < 5; ++i) {
+        printf("%p ", &overLoadedPackedData[i]);
+    }
+    printf("\n");
+    printf("%ld\n", (char*)&doubleData[7]-(char*)&doubleData[5]);
+    printf("%ld\n", (short*)&doubleData[7]-(short*)&doubleData[5]);
+    printf("%ld\n", (int*)&doubleData[7]-(int*)&doubleData[5]);
+    printf("%ld\n", &doubleData[7]-&doubleData[5]);
+
+    for (short *pShort = (short *)shortData; pShort < shortData + 10 ; pShort++) {
+        printf("%d ", *pShort);
+    }
+    printf("\n");
+    for (char *pCharShort = (char *)shortData; pCharShort < (char *)(shortData + 10) ; pCharShort++) {
+        printf("%d ", *pCharShort);
+    }
+    for (long *pLong = longData; pLong < longData + 10 ; pLong++) {
+        printf("%ld ", *pLong);
+    }
+    printf("\n");
+    for (char *pCharLong = (char *)longData; pCharLong < (char *)(longData + 10) ; pCharLong++) {
+        printf("%d ", *pCharLong);
+    }
+    printf("\n");
+    printf("ByteOrder MSB: %d\n", isMSB());
+    printf("ByteOrder LSB: %d\n", isLSB());
+    printf("%hx\n", invertByteOrderShort(0x1122));
+    printf("%hx\n", invertByteOrderShort(0x1234));
+    printf("%x\n", invertByteOrderInt(0x11223344));
+    printf("%x\n", invertByteOrderInt(0x12345678));
+    printf("%lx\n", invertByteOrderLong(0x1122334455667788));
+    printf("%lx\n", invertByteOrderLong(0x123456789ABCDEF0));
+    return 0;
+}
