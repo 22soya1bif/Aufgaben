@@ -1,0 +1,155 @@
+//
+// Datum: 10.05.23.
+// Verschieden Funktionen für Rechenregeln mit Brüchen
+
+#include "Fraction.h"
+#include <stdexcept>
+#include <iostream>
+#include <cmath>
+#include <string>
+#include <regex>
+
+
+Fraction::Fraction(int counter, int denominator) : counter(counter), denominator(denominator) {//Kontruktur
+    normalize();
+}
+
+Fraction::Fraction(double value, int maxdenom) {
+    int sign = (value < 0) ? -1 : 1;
+    value = std::abs(value);
+
+    //Algorithmus um Gleitkommazahl auf nächsten Bruch zu präzisieren
+    int q = 1, qz = 0, qw = 0, qt = 1;
+    double b = value;
+    do {
+        int a = static_cast<int>(b);
+        int t = a * q + qz;
+        int k = a * qw + qt;
+        if (k > maxdenom) {
+            break;
+        }
+        qz = q; q = t;
+        qt = qw; qw = k;
+        b = 1 / (b - a);
+    } while (std::abs(value - static_cast<double>(q) / qw) > value * std::numeric_limits<double>::epsilon());
+
+    counter = q * sign;
+    denominator = qw;
+    normalize();
+}
+
+Fraction Fraction::add(const Fraction& other) const {
+
+    //gleiches Prinzip bei add, sub & mod: #1) gemeinsamer Nenner, #2) jeweils Zähler berechnen, #3) Z#hler addieren
+    int commonDenominator = denominator * other.denominator;
+    int counter2 = counter * other.denominator;
+    int counter3 = other.counter * denominator;
+    int resultCounter = counter2 + counter3;
+
+    Fraction result(resultCounter, commonDenominator);
+    result.normalize();
+    return result;
+}
+
+Fraction Fraction::sub(const Fraction& other) const {
+
+    int commonDenominator = denominator * other.denominator;
+    int counter2 = counter * other.denominator;
+    int counter3 = other.counter * denominator;
+    int resultCounter = counter2 - counter3;
+
+    Fraction result(resultCounter, commonDenominator);
+    result.normalize();
+    return result;
+}
+
+Fraction Fraction::mul(const Fraction &other) const {
+    int newDenominator = denominator* other.denominator;
+    int newCounter  = counter * other.counter;
+
+    Fraction result(newCounter, newDenominator);
+    result.normalize();
+    return  result;
+}
+Fraction Fraction::div(const Fraction &other) const {
+    int newDenominator = denominator* other.counter;
+    int newCounter  = counter * other.denominator;
+
+    Fraction result(newCounter, newDenominator);
+    result.normalize();
+    return  result;
+}
+
+Fraction Fraction::mod(const Fraction &other) const {
+
+    int commonDenominator = denominator * other.denominator;
+    int counter2 = counter * other.denominator;
+    int counter3 = other.counter * denominator;
+    int modResult= counter2 % counter3;
+
+    Fraction result ( modResult, commonDenominator);
+    result.normalize();
+    return result;
+}
+
+Fraction Fraction::operator+(const Fraction& other) const { return add(other); }
+Fraction Fraction::operator-(const Fraction& other) const { return sub(other); }
+Fraction Fraction::operator*(const Fraction& other) const { return mul(other); }
+Fraction Fraction::operator/(const Fraction& other) const { return div(other); }
+Fraction Fraction::operator%(const Fraction& other) const { return mod(other); }
+
+// hier (wenn mehr als ein Operator, zB +=) kann man nicht einfach returnen
+// da das Objekt modifiziert und dann zurückgegeben muss, also mit Pointer auf aktuelles Objekt
+Fraction Fraction::operator+=(const Fraction &other) { *this = add(other); return *this; }
+Fraction Fraction::operator-=(const Fraction &other) { *this = sub(other); return *this; }
+Fraction Fraction::operator*=(const Fraction &other) { *this = mul(other); return *this; }
+Fraction Fraction::operator/=(const Fraction &other) { *this = div(other); return *this; }
+Fraction Fraction::operator%=(const Fraction &other) { *this = mod(other); return *this; }
+
+int Fraction::gcd(int ctr, int den) {
+    //normaler gcd Algo
+    while (den != 0) {
+        int temporary = den;
+        den = ctr % den;
+        ctr = temporary;
+    }
+    return ctr;
+}
+
+void Fraction::normalize() {
+    if (denominator == 0) {
+        throw std::invalid_argument("Null-Division ist n.d.");
+    }
+    int greatestDivisor = gcd(counter, denominator);
+    counter /= greatestDivisor;
+    denominator /= greatestDivisor;
+
+    if (denominator < 0) {
+        counter = -counter;
+        denominator = -denominator;
+    }
+}
+
+std::ostream &operator<<(std::ostream &out, const Fraction &fraction) {
+    out << fraction.getCounter() << "/" << fraction.getDenominator();
+    return out;
+
+}
+
+std::istream &operator>>(std::istream &in, Fraction &fraction) {
+    std::string inputStr;
+    in >> inputStr;
+
+    //Regex-Formel nach der gesucht wird
+    std::regex fractionPattern(R"((\d+),(\d+))");
+    std::smatch match;
+
+    if (std::regex_match(inputStr, match, fractionPattern)) {
+        int numerator = std::stoi(match[1].str());
+        int denominator = std::stoi(match[2].str());
+        fraction = Fraction(numerator, denominator);
+    }
+
+    return in;
+}
+
